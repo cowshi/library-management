@@ -1,56 +1,74 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'librarymanage.dart';
 
-class SignupPage extends StatefulWidget {
+class LoginPage extends StatefulWidget {
   @override
-  _SignupPageState createState() => _SignupPageState();
+  _LoginPageState createState() => _LoginPageState();
 }
 
-class _SignupPageState extends State<SignupPage> {
+class _LoginPageState extends State<LoginPage> {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController genderController = TextEditingController();
-  final TextEditingController emailController = TextEditingController();
 
-  Future<void> signUp() async {
+  Future<void> login() async {
     final response = await http.post(
-      Uri.parse('http://92.205.109.210:8070/api/signup'),
+      Uri.parse('http://92.205.109.210:8070/api/login'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
         'name': nameController.text.trim(),
         'pwd': passwordController.text.trim(),
-        'gender': genderController.text.trim(),
-        'mail': emailController.text.trim(),
       }),
     );
 
     if (response.statusCode == 200) {
-      Navigator.pop(context); // Return to login
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => LibraryManagementSystem()),
+      );
     } else {
-      showMessage("Sign Up Failed: ${response.body}");
+      showMessage('Login failed: ${response.statusCode}\n${response.body}');
     }
   }
 
   void showMessage(String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(msg),
+        backgroundColor: Colors.redAccent,
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(title: Text("Sign Up"), backgroundColor: Colors.pink[50]),
+      appBar: AppBar(title: Text("Login"), backgroundColor: Colors.pink[50]),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
           children: [
-            TextField(controller: nameController, decoration: InputDecoration(labelText: "Username")),
-            TextField(controller: passwordController, decoration: InputDecoration(labelText: "Password"), obscureText: true),
-            TextField(controller: genderController, decoration: InputDecoration(labelText: "Gender")),
-            TextField(controller: emailController, decoration: InputDecoration(labelText: "Email")),
+            TextField(
+              controller: nameController,
+              decoration: InputDecoration(labelText: "Name"),
+            ),
+            TextField(
+              controller: passwordController,
+              decoration: InputDecoration(labelText: "Password"),
+              obscureText: true,
+            ),
             SizedBox(height: 20),
-            ElevatedButton(onPressed: signUp, child: Text("Sign Up"))
+            ElevatedButton(
+              onPressed: login,
+              child: Text("Login"),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.pink[100]),
+            ),
+            TextButton(
+              child: Text("Don't have an account? Sign Up"),
+              onPressed: () => Navigator.pushNamed(context, '/SignupPage'),
+            ),
           ],
         ),
       ),
